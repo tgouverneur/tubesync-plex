@@ -1,0 +1,4 @@
+[DEFAULT]
+plex_base_url = 'http://vod:32100'
+plex_token = ''
+plex_library_name = 'YouTube Channels'
