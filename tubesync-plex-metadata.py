@@ -1,11 +1,13 @@
 import os
 import configparser
 import argparse
+import glob
+import re
 from pathlib import Path
 from plexapi.server import PlexServer
 import lxml.etree as ET
 
-def main(config_path, silent, syncAll):
+def main(config_path, silent, syncAll, subtitles):
 
     config = configparser.ConfigParser()
     config.read(config_path)
@@ -34,9 +36,21 @@ def main(config_path, silent, syncAll):
                 root = tree.getroot()
                 title = root.find('title').text
                 aired = root.find('aired').text
+                plot = root.find('plot').text
                 print ('[-] Trying to update title to be: ' + title + ' - Aired: ' + aired) if not silent else None
                 ep.editTitle(title, locked=True)
                 ep.editSortTitle(aired, locked=True)
+                ep.editSummary(plot, locked=True)
+                if subtitles:
+                    subtitle_file_path = part.file.replace(".mkv", "")
+                    part_path = os.path.dirname(part.file)
+                    file_name = os.path.basename(part.file).replace(".mkv", "")
+                    for root, dirs, files in os.walk(part_path):
+                        for file in files:
+                            if file.startswith(file_name) and file.endswith(".vtt"):
+                                print ('[-] Found subtitle file: ' + file)
+                                ep.uploadSubtitles(part_path + '/' + file)
+
 
 
 if __name__ == "__main__":
@@ -44,8 +58,9 @@ if __name__ == "__main__":
     parser.add_argument('-c', '--config', type=str, default='./config.ini', help='Path to the config file')
     parser.add_argument('-s', '--silent', action='store_true', help='Run in silent mode')
     parser.add_argument('--all', action='store_true', help='Update everything in the library')
+    parser.add_argument('--subtitles', action='store_true', help='Find subtitles for the video and upload them to plex')
     args = parser.parse_args()
-    main(args.config, args.silent, args.all)
+    main(args.config, args.silent, args.all, args.subtitles)
 
 
 

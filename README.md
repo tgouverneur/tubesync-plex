@@ -28,8 +28,12 @@ options:
   -c CONFIG, --config CONFIG
                         Path to the config file
   -s, --silent          Run in silent mode
+  --subtitles           Find subtitles for the video and upload them to plex
   --all                 Update everything in the library
 
 $ python3 tubesync-plex-metadata.py --all
 ```
 
+## Caveats
+
+The `--subtitles` option seems to not work on my systems for some reason it returns 400. If anyone get it to work, I'm interested to know...
