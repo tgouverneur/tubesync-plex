@@ -31,12 +31,28 @@ def main(config_path, silent, syncAll, subtitles):
                 
             if os.path.exists(nfo_data_file_path):
                 print('[-] Trying to parse NFO file') if not silent else None
-                parser = ET.XMLParser(recover=True)
-                tree = ET.parse(nfo_data_file_path, parser=parser)
+                try:
+                    parser = ET.XMLParser(recover=True)
+                    tree = ET.parse(nfo_data_file_path, parser=parser)
+                except IOError as e:
+                    print(f"IOError: Could not open file. Details: {e}")
+                    continue
+                except ET.XMLSyntaxError as e:
+                    print(f"XMLSyntaxError: Malformed XML. Details: {e}")
+                    continue
+                except Exception as e:
+                    print(f"An unexpected error occurred: {e}")
+                    continue
                 root = tree.getroot()
-                title = root.find('title').text
-                aired = root.find('aired').text
-                plot = root.find('plot').text
+                if root is None:
+                    continue
+                title = aired = plot = ''
+                if root.find('title') is not None:
+                    title = root.find('title').text
+                if root.find('aired') is not None:
+                    aired = root.find('aired').text
+                if root.find('plot') is not None:
+                    plot = root.find('plot').text
                 print ('[-] Trying to update title to be: ' + title + ' - Aired: ' + aired) if not silent else None
                 ep.editTitle(title, locked=True)
                 ep.editSortTitle(aired, locked=True)
